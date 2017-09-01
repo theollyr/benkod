@@ -28,7 +28,6 @@ defmodule Benkod.Mixfile do
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
 
-      {:benchfella, "~> 0.3", only: :bench},
       {:benchee, "~> 0.9", only: :bench},
       {:bento, "~> 0.9", only: :bench},
       {:bencode, "~> 0.3", only: :bench},
