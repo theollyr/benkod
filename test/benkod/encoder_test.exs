@@ -1,5 +1,5 @@
 defmodule Benkod.EncoderTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   import Benkod
 
   test "encode numbers" do

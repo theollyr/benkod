@@ -1,5 +1,5 @@
 defmodule Benkod.DecoderTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   import Benkod
   alias Benkod.Decoder.Error
