@@ -85,7 +85,7 @@ defmodule Benkod.Decoder do
   ## Other
 
   defp rev_digits_to_integer(digits) do
-    digits |> Enum.reverse |> IO.iodata_to_binary |> String.to_integer
+    digits |> Enum.reverse |> List.to_integer
   end
 
   ## Error handling
