@@ -26,7 +26,7 @@ defmodule Benkod.Decoder do
 
   defp do_decode("i" <> rest), do: decode_number(rest)
   defp do_decode("l" <> rest), do: decode_list(rest, [])
-  defp do_decode("d" <> rest), do: decode_map(rest, %{})
+  defp do_decode("d" <> rest), do: decode_map(rest, [])
   defp do_decode(<<c>> <> _ = rest) when c in '1234567890', do: decode_string(rest)
   defp do_decode(rest), do: err_rest(rest)
 
@@ -75,11 +75,11 @@ defmodule Benkod.Decoder do
 
   ## Decode map
 
-  defp decode_map("e" <> rest, acc), do: {acc, rest}
+  defp decode_map("e" <> rest, acc), do: {Map.new(acc), rest}
   defp decode_map(rest, acc) do
     with {key, rest} <- decode_string(rest),
          {value, rest} <- do_decode(rest),
-         do: decode_map(rest, Map.put(acc, key, value))
+         do: decode_map(rest, [{key, value} | acc])
   end
 
   ## Other
