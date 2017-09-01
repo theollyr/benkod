@@ -1,4 +1,4 @@
-data = File.read!("example.torrent")
+data = File.read!("test/data/archlinux-2017.09.01-x86_64.iso.torrent")
 
 Benchee.run(%{
     "benkod"   => fn -> Benkod.decode(data) end,
