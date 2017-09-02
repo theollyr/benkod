@@ -14,13 +14,12 @@ defmodule Benkod.Encoder do
   defp do_encode_list([e | rest], acc), do: do_encode_list(rest, [encode(e) | acc])
 
   defp do_encode_map(map) do
-    encoded =
-      map
-      |> Map.to_list
-      |> Enum.sort(&(elem(&1, 0) >= elem(&2, 0)))
-      |> Enum.reduce([?e], fn {key, value}, acc ->
-        [[encode(key), encode(value)] | acc]
-      end)
-    [?d | encoded]
+    map
+    |> Map.to_list
+    |> Enum.sort(&(elem(&1, 0) >= elem(&2, 0)))
+    |> Enum.reduce([?e], fn {key, value}, acc ->
+      [[encode(key), encode(value)] | acc]
+    end)
+    |> (&[?d | &1]).()
   end
 end

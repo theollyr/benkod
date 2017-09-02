@@ -21,13 +21,15 @@ defmodule Benkod.Decoder do
     :eoi -> {:error, Error.exception(type: :eoi, at: -1)}
     {type, msg, rest, offset} ->
       at = byte_size(data) - byte_size(rest) - offset
-      {:error, Error.exception(type: type, at: at, invalid: [msg] |> IO.iodata_to_binary)}
+      msg = IO.iodata_to_binary([msg])
+
+      {:error, Error.exception(type: type, at: at, invalid: msg)}
   end
 
   defp do_decode("i" <> rest), do: decode_number(rest)
   defp do_decode("l" <> rest), do: decode_list(rest, [])
   defp do_decode("d" <> rest), do: decode_map(rest, [])
-  defp do_decode(<<c>> <> _ = rest) when c in '1234567890', do: decode_string(rest)
+  defp do_decode(<<c>> <> _ = rest) when c in ?0..?9, do: decode_string(rest)
   defp do_decode(rest), do: err_rest(rest)
 
   ## Decode number
@@ -36,34 +38,35 @@ defmodule Benkod.Decoder do
   defp decode_number("e" <> _ = rest), do: err(:number, "ie", rest, 1)
   defp decode_number("-e" <> _ = rest), do: err(:number, "i-e", rest, 1)
   defp decode_number("-0" <> _ = rest), do: err(:number, "i-0...", rest, 1)
-  defp decode_number(<<digit>> <> rest) when digit in '-123456789', do: continue_number(rest, [digit])
+  defp decode_number(<<digit>> <> rest) when digit in '-123456789',
+    do: continue_number(rest, [digit])
   defp decode_number(rest), do: err_rest(rest)
 
   defp continue_number("e" <> rest, digits) do
     {rev_digits_to_integer(digits), rest}
   end
-  defp continue_number(<<digit>> <> rest, digits) when digit in '1234567890', do: continue_number(rest, [digit | digits])
+  defp continue_number(<<digit>> <> rest, digits) when digit in ?0..?9,
+    do: continue_number(rest, [digit | digits])
   defp continue_number(rest, _), do: err_rest(rest)
 
   ## Decode string
 
   defp decode_string("0:" <> rest), do: {"", rest}
-  defp decode_string(<<digit>> <> rest) when digit in '123456789', do: decode_string_length(rest, [digit])
+  defp decode_string(<<digit>> <> rest) when digit in ?1..?9,
+    do: continue_string(rest, [digit])
   defp decode_string(rest), do: err_rest(rest)
 
-  defp decode_string_length(":" <> rest, digits) do
+  defp continue_string(":" <> rest, digits) do
     length = rev_digits_to_integer(digits)
-    decode_string_finish(rest, length)
-  end
-  defp decode_string_length(<<digit>> <> rest, digits) when digit in '1234567890', do: decode_string_length(rest, [digit | digits])
-  defp decode_string_length(rest, _), do: err_rest(rest)
-
-  defp decode_string_finish(rest, length) do
     <<string :: binary-size(length)>> <> rest = rest
     {string, rest}
   rescue
     MatchError -> err(:eoi)
   end
+
+  defp continue_string(<<digit>> <> rest, digits) when digit in ?0..?9,
+    do: continue_string(rest, [digit | digits])
+  defp continue_string(rest, _), do: err_rest(rest)
 
   ## Decode list
 
@@ -79,7 +82,7 @@ defmodule Benkod.Decoder do
   defp decode_map(rest, acc) do
     with {key, rest} <- decode_string(rest),
          {value, rest} <- do_decode(rest),
-         do: decode_map(rest, [{key, value} | acc])
+    do:  decode_map(rest, [{key, value} | acc])
   end
 
   ## Other
