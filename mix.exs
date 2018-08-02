@@ -30,6 +30,7 @@ defmodule Benkod.Mixfile do
 
       {:benchee, "~> 0.9", only: :bench},
       {:bento, "~> 0.9", only: :bench},
+      {:poison, "~> 3.1", only: :bench, override: true},
       {:bencode, "~> 0.3", only: :bench},
       {:bencoder, "~> 0.0.7", only: :bench},
       {:bencodex, github: "patrickgombert/Bencodex", only: :bench},
